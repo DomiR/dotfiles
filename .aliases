@@ -139,3 +139,111 @@ alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resource
 
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec $SHELL -l"
+
+# Own
+alias slate="subl ~/.slate"
+alias lock="sudo open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app"
+alias allard="cd ~/Desktop/Allard\ Pierson\ Museum/iPad\ assets/RFID_SERVER"
+
+# -------------------------------------------------------------------
+# Git
+# -------------------------------------------------------------------
+alias ghostscript='/usr/local/bin/gs'
+alias g='git status'
+alias gs='git status'
+alias ga='git add'
+alias gap='git add -p'
+alias gp='git push'
+alias gpt='git push -u origin $(git_current_branch)'
+alias gl='git log'
+alias gpl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gm='git commit -m'
+alias gma='git commit -am'
+alias gb='git branch'
+alias gc='git checkout'
+alias gcb='git checkout -b'
+alias gra='git remote add'
+alias grr='git remote rm'
+alias gpu='git pull'
+alias gcl='git clone'
+alias gta='git tag -a -m'
+alias gf='git reflog'
+alias gv='git log --pretty=format:'%s' | cut -d " " -f 1 | sort | uniq -c | sort -nr'
+alias gls='git log --graph --oneline --all'
+alias grf='git rebase -i --autosquash'
+alias gf='git commit --fixup'
+# Connections
+alias stora='ssh -2 -p 22 root@192.168.2.9'
+alias storaftp='sftp root@192.168.2.9:/home/0common/UnsereDownloads'
+alias iphone='ssh root@domiphone.local'
+alias ipad='ssh root@domipad.local'
+alias macbook='ssh domiget@domimac.local'
+alias marvin='raude@marvin.informatik.uni-stuttgart.de'
+alias marvinftp='sftp raude@marvin.informatik.uni-stuttgart.de'
+alias marvinssh='ssh raude@marvin.informatik.uni-stuttgart.de'
+alias marvinproxy='ssh raude@marvin.informatik.uni-stuttgart.de -D 8081'
+alias server='ssh root@212.47.190.113'
+alias serverftp='sftp root@212.47.190.113'
+alias proxy='ssh root@212.47.190.113 -D 8080'
+alias meschserver='ssh pi@129.69.180.147'
+alias pingg="ping 8.8.8.8"
+
+# Fun with directories
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias back='cd $OLDPWD'
+
+# Some tweaks
+alias bashedit="subl ~/.zprofile"
+alias slate="subl ~/.slate"
+alias amethyst="subl ~/.amethyst"
+alias reload="source ~/.zprofile"
+alias coffee="nodemon"
+alias cup="/usr/local/bin/coffee"
+
+alias dirs='ls -d */'
+alias ls="ls -G"
+alias ll='ls -l'ex
+alias lf='ls -F'
+alias l='ls -la'
+alias h=history
+alias hm="history | more"
+alias hf="history | grep "
+alias gi="grep -i"
+alias ff.="find . -type f -iname"
+alias f.="find . -iname"
+alias mc="marvin 'ssh mcl@meshgw'"
+alias down="cd ~/Downloads/"
+alias list="cat ~/.zprofile"
+alias lock="sudo open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app"
+alias cs='nesh -c -e ~/.nesh/nesh_profile.coffee'
+alias sleep="pmset sleepnow"
+alias tveryssh="ssh dominique@144.76.79.154 -p 44234"
+alias tveryrethink="ssh -L 8080:localhost:8080 -L 28015:localhost:28015 -L 28016:localhost:28016 dominique@144.76.79.154 -p 44234"
+alias tveryserverip="echo 144.76.79.154"
+alias unalias="type"
+alias ip=""
+alias ipext="curl http://ipecho.net/plain"
+
+# ------------------------------
+# Personal projects
+alias hiwi="osascript ~/Applications/bin/mesch.scpt"
+alias mesch="cd /Users/domiget/Developer/HIWI/mesch-server"
+alias tvery="osascript ~/Applications/bin/tvery.scpt"
+alias tveryxcode="cd ~/Developer/xCode/TVery/TVery"
+alias tverysketch="cup /Users/domiget/Developer/xCode/TVery/TVery/makeSketch.coffee"
+alias master="osascript ~/Applications/bin/master.scpt"
+alias projects="cd ~/Developer/"
+
+# ------------------------------
+# Apps
+alias mysqlstart="sudo /usr/local/mysql/support-files/mysql.server start"
+alias mysqlstop="sudo /usr/local/mysql/support-files/mysql.server stop"
+alias jasmine="jasmine-node --coffee"
+alias package="cd \"/Users/domiget/Library/Application Support/Sublime Text 3/Packages\""
+alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
+alias nodepod="/usr/local/lib/node_modules/pod/bin/pod"
+alias npod="/usr/local/lib/node_modules/pod/bin/pod"

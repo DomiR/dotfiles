@@ -244,3 +244,679 @@ function o() {
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+# ------------------------------
+# Personal helpers
+# Pasteboard html 2 jade
+function 2jade (){
+  pbpaste | html2jade -t --donotencode | sed -e '1,2D' | gsed -e 's/^\t\t//g' | pbcopy
+}
+
+function 2coffee (){
+  pbpaste | js2coffee --ident tab | pbcopy
+}
+
+function eject() {
+  diskutil unmount "$1"
+}
+
+function watchfile() {
+  watch -n 1 "ls -lh $1 | awk '{print \$5}'"
+}
+
+
+# Reveal a file or directory in Finder
+# ..expects only one argument
+# the argument is quoted to accommodate spaces in the filename
+reveal () {
+   # if the first arg is a directory
+   if [[ -d "$1" ]];
+       then
+           # ..use the argument directly
+           basedir="$1"
+       else
+           # ..we passed a file, so use its containing directory
+           basedir=$(dirname "$1")
+   fi
+   # basedir is a directory in now, so open will activate Finder
+   open "$basedir"
+}
+
+# -------------------------------------------------------------------
+# compressed file expander
+# (from https://github.com/myfreeweb/zshuery/blob/master/zshuery.sh)
+# -------------------------------------------------------------------
+ex() {
+  if [[ -f $1 ]]; then
+    case $1 in
+      *.tar.bz2) tar xvjf $1;;
+      *.tar.gz) tar xvzf $1;;
+      *.tar.xz) tar xvJf $1;;
+      *.tar.lzma) tar --lzma xvf $1;;
+      *.bz2) bunzip $1;;
+      *.rar) unrar x $1;;
+      *.gz) gunzip $1;;
+      *.tar) tar xvf $1;;
+      *.tbz2) tar xvjf $1;;
+      *.tgz) tar xvzf $1;;
+      *.zip) unzip $1;;
+      *.Z) uncompress $1;;
+      *.7z) 7z x $1;;
+      *.xz) xz -d $1;;
+      *.dmg) hdiutul mount $1;; # mount OS X disk images
+      *) echo "'$1' cannot be extracted via >ex<";;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# -------------------------------------------------------------------
+# any function from http://onethingwell.org/post/14669173541/any
+# search for running processes
+# -------------------------------------------------------------------
+any() {
+  emulate -L zsh
+  unsetopt KSH_ARRAYS
+  if [[ -z "$1" ]] ; then
+    echo "any - grep for process(es) by keyword" >&2
+    echo "Usage: any " >&2 ; return 1
+  else
+    ps xauwww | grep -i --color=auto "[${1[1]}]${1[2,-1]}"
+  fi
+}
+
+# -------------------------------------------------------------------
+# display a neatly formatted path
+# -------------------------------------------------------------------
+pathPrint() {
+  echo ${PATH} | tr ":" "\n" | \
+  awk "{ sub(\"/usr\",   \"$fg_no_bold[green]/usr$reset_color\"); \
+  sub(\"/bin\",   \"$fg_no_bold[blue]/bin$reset_color\"); \
+  sub(\"/opt\",   \"$fg_no_bold[cyan]/opt$reset_color\"); \
+  sub(\"/sbin\",  \"$fg_no_bold[magenta]/sbin$reset_color\"); \
+  sub(\"/local\", \"$fg_no_bold[yellow]/local$reset_color\"); \
+  print }"
+}
+
+# view man pages in Preview
+pman() { ps=`mktemp -t manpageXXXX`.ps ; man -t $@ > "$ps" ; open "$ps" ; }
+
+# -------------------------------------------------------------------
+# nice mount (http://catonmat.net/blog/another-ten-one-liners-from-commandlingfu-explained)
+# displays mounted drive information in a nicely formatted manner
+# -------------------------------------------------------------------
+function nicemount() { (echo "DEVICE PATH TYPE FLAGS" && mount | awk '$2="";1') | column -t ; }
+
+# -------------------------------------------------------------------
+# myIP address
+# -------------------------------------------------------------------
+function myip() {
+  ifconfig lo0 | grep 'inet ' | sed -e 's/:/ /' | awk '{print "lo0       : " $2}'
+  ifconfig en0 | grep 'inet ' | sed -e 's/:/ /' | awk '{print "en0 (IPv4): " $2 " " $3 " " $4 " " $5 " " $6}'
+  ifconfig en0 | grep 'inet6 ' | sed -e 's/ / /' | awk '{print "en0 (IPv6): " $2 " " $3 " " $4 " " $5 " " $6}'
+  ifconfig en5 | grep 'inet ' | sed -e 's/:/ /' | awk '{print "en5 (IPv4): " $2 " " $3 " " $4 " " $5 " " $6}'
+  ifconfig en5 | grep 'inet6 ' | sed -e 's/ / /' | awk '{print "en5 (IPv6): " $2 " " $3 " " $4 " " $5 " " $6}'
+}
+
+# -------------------------------------------------------------------
+# (s)ave or (i)nsert a directory.
+# -------------------------------------------------------------------
+s() { pwd > ~/.save_dir ; }
+i() { cd "$(cat ~/.save_dir)" ; }
+
+# -------------------------------------------------------------------
+# console function
+# -------------------------------------------------------------------
+function console () {
+  if [[ $# > 0 ]]; then
+    query=$(echo "$*"|tr -s ' ' '|')
+    tail -f /var/log/system.log|grep -i --color=auto -E "$query"
+  else
+    tail -f /var/log/system.log
+  fi
+}
+
+# -------------------------------------------------------------------
+# shell function to define words
+# http://vikros.tumblr.com/post/23750050330/cute-little-function-time
+# -------------------------------------------------------------------
+givedef() {
+  if [[ $# -ge 2 ]] then
+    echo "givedef: too many arguments" >&2
+    return 1
+  else
+    curl "dict://dict.org/d:$1"
+  fi
+}
+
+function offlineDoc (){
+  cd /Users/domiget/Applications/Docs/devdocs/
+  rackup
+}
+
+function chrome () {
+  /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome $* 2>&1 &
+}
+
+function checkonline () {
+  while true; do
+        #echo "test"
+        ping -c1 -W2 8.8.8.8 2>&1 >/dev/null
+        if [[ "$?" == "0" ]]; then
+          say "Internet is up again."
+          break
+        fi
+      done
+    }
+
+function cleardnscache () {
+  dscacheutil -flushcache
+  sudo discoveryutil udnsflushcaches
+}
+
+# PDF optimization level selection options
+# -dPDFSETTINGS=/screen   (screen-view-only quality, 72 dpi images)
+# -dPDFSETTINGS=/ebook    (low quality, 150 dpi images)
+# -dPDFSETTINGS=/printer  (high quality, 300 dpi images)
+# -dPDFSETTINGS=/prepress (high quality, color preserving, 300 dpi imgs)
+# -dPDFSETTINGS=/default  (almost identical to /screen)
+# Paper size selection options
+# -sPAPERSIZE=letter
+# -sPAPERSIZE=a4
+# -dDEVICEWIDTHPOINTS=w -dDEVICEHEIGHTPOINTS=h (point=1/72 of an inch)
+# -dFIXEDMEDIA (force paper size over the PostScript defined size)
+# Other options
+# -dEmbedAllFonts=true
+# -dSubsetFonts=false
+# -dFirstPage=pagenumber
+# -dLastPage=pagenumber
+# -dAutoRotatePages=/PageByPage
+# -dAutoRotatePages=/All
+# -dAutoRotatePages=/None
+# -r1200 (resolution for pattern fills and fonts converted to bitmaps)
+# -sPDFPassword=password
+pdfResize() {
+  gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -dPDFSETTINGS=/$1 -sOutputFile=output.pdf $2
+}
+
+# Make alias for
+function mkalias ()
+{
+  if [[ ($1 != "") && ($2 != "") ]]; then
+   echo "alias $1=\"$2\"" >> ~/.bash_profile
+   alias $1="$2"
+ else
+  echo "Usage: mkalias <aliasname> <\"aliasfunction\">"
+fi
+}
+
+# Print npm
+function npm-ls() {
+  npm ls "$@" | grep "^[└├]" | sed "s/─┬/──/g"
+}
+
+
+# ------------------------------
+# Foldernavigation
+# find file and change there
+function cdfile (){
+  if [[ $1 = "" ]]; then
+    echo "Usage: cdf <name>"
+  else
+    cd "$(find . -iname $1 -exec dirname {} \;)"
+  fi
+}
+
+# Ask finder for front window folder
+function ff {
+  osascript -e 'tell application "Finder"'\
+  -e "if (${1-1} <= (count Finder windows)) then"\
+  -e "get POSIX path of (target of window ${1-1} as alias)"\
+  -e 'else' -e 'get POSIX path of (desktop as alias)'\
+  -e 'end if' -e 'end tell';
+}
+
+# Change directory to finder front window folder
+function cdff {
+  cd "`ff $@`";
+}
+
+
+
+# ------------------------------
+# Filemanipulation
+# Hide folder or file
+function hide (){
+  if [[ $1 = "" ]]; then
+   echo "Usage: hide <name>"
+ else
+  chflags hidden "$1"
+fi
+}
+
+# Hide folder or file
+function unhide (){
+  if [[ $1 = "" ]]; then
+    echo "Usage: unhide <name>"
+  else
+    chflags nohidden "$1"
+  fi
+}
+
+# Builtin rm will move files to trash
+function rm () {
+  local path
+  for path in "$@"; do
+
+        # ignore any arguments
+        if [[ "${path}" = -* ]]; then
+          echo "Arguments are ignored."
+        else
+          local dst=${path##*/}
+            # append the time if necessary
+            while [ -e ~/.Trash/"$dst" ]; do
+              dst="$dst "$(date +%H-%M-%S)
+            done
+            /bin/mv "${path}" ~/.Trash/"$dst"
+          fi
+        done
+      }
+
+# Make directory and enter it immediately thereafter
+function mkcd() {
+  if [[ $1 != "" ]]; then
+    mkdir -p $1
+    cd $1
+  else
+    echo "Usage: mkcd <dir>"
+  fi
+}
+
+
+# ------------------------------
+# University helpers
+# Print on zarquon, Hauptstudiumspool
+function printzarquon ()
+{
+  if [[ $1 != "" ]]; then
+    cat "$1"|marvinssh lpr -P zarquon
+  else
+    echo "Usage: printzarquon <file>"
+  fi
+}
+
+# Print on duesentrieb, Grundstudiumspool
+function printduesen ()
+{
+  if [[ $1 != "" ]]; then
+    cat "$1"|marvinssh lpr -P duesentrieb
+  else
+    echo "Usage: printduesen <file>"
+  fi
+}
+
+# Show all files
+function showAllFiles ()
+{
+  defaults write com.apple.finder AppleShowAllFiles TRUE
+  killall Finder
+}
+
+# Hide all files
+function hideAllFiles ()
+{
+  defaults write com.apple.finder AppleShowAllFiles FALSE
+  killall Finder
+}
+
+
+
+# ------------------------------
+# Leap
+function leap-up() {
+  (sleep 1 && open /Applications/Leap\ Motion.app)&
+  /Applications/Leap\ Motion.app/Contents/MacOS/leapd
+}
+
+function leap-down() {
+  killall leapd
+  killall Leap\ Motion
+}
+
+function ghelp() {
+  echo "g = 'git status'"
+  echo "gs  = 'git status'"
+  echo "ga  = 'git add'"
+  echo "gap = 'git add -p'"
+  echo "gp  = 'git push'"
+  echo "gpt = 'git push -u origin $(git_current_branch)'"
+  echo "gl  = 'git log'"
+  echo "gls = 'git log --graph --oneline --all'"
+  echo "gpl = \"git log --pretty = format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit\""
+  echo "gd  = 'git diff'"
+  echo "gdc = 'git diff --cached'"
+  echo "gm  = 'git commit -m'"
+  echo "gma = 'git commit -am'"
+  echo "gb  = 'git branch'"
+  echo "gc  = 'git checkout'"
+  echo "gcb = 'git checkout -b'"
+  echo "gra = 'git remote add'"
+  echo "grr = 'git remote rm'"
+  echo "gpu = 'git pull'"
+  echo "gcl = 'git clone'"
+  echo "gta = 'git tag -a -m'"
+  echo "gf  = 'git reflog'"
+  echo "gv  = 'git log --pretty  = format:'%s' | cut -d " " -f 1 | sort | uniq -c | sort -nr'"
+  echo "grf = 'git rebase -i --autosquash'"
+  echo "gf = 'git commit --fixup'"
+}
+
+function uploaded() {
+  for i in $(pbpaste)
+  do
+    plowdown -a 13570248:Googler! $i
+  done
+}
+
+function uploadedStora() {
+
+}
+
+# ------------------------------
+# TODO
+# cd file
+# function cd (){
+#     if [[ $1 = "" ]]; then
+#         echo "Usage: cdf <name>"
+#     else
+#         if [ -f $1]; then
+#             builtin cd ${$1%/*}
+#         else
+#             builtin cd $1
+#         fi
+#     fi
+# }
+
+# # find dir and change there
+# function cdf (){
+#     if [[ $1 = "" ]]; then
+#         echo "Usage: cdf <name>"
+#     else
+#         cd "$(find . -iname $1)"
+#     fi
+# }
+
+
+
+
+function git_current_branch(){
+  git symbolic-ref --short -q HEAD
+}
+
+function git_current_tracking()
+{
+  local BRANCH="$(git_current_branch)"
+  local REMOTE="$(git config branch.$BRANCH.remote)"
+  local MERGE="$(git config branch.$BRANCH.merge)"
+  if [ -n "$REMOTE" -a -n "$MERGE" ]
+    then
+    echo "$REMOTE/$(echo "$MERGE" | sed 's#^refs/heads/##')"
+  else
+    echo "\"$BRANCH\" is not a tracking branch." >&2
+    return 1
+  fi
+}
+
+function _git_assert_origin_head() {
+  if ! git rev-parse origin/HEAD &> /dev/null; then
+    if git rev-parse origin/develop &> /dev/null; then
+      local TARGET=develop
+    else
+      local TARGET=master
+    fi
+
+    echo fatal: origin/HEAD is not set. >&2
+    echo >&2
+    echo Maybe run \`git remote set-head origin $TARGET\`? >&2
+    return 1
+  fi
+}
+
+function _git_rebase_target() {
+  if git rev-parse @{u} &> /dev/null; then
+    echo "@{u}"
+  else
+    _git_assert_origin_head
+    echo "origin/HEAD"
+  fi
+}
+
+function git-log() {
+  git log -M40 --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %C(green bold)- %an %C(black bold)%cd (%cr)%Creset' --abbrev-commit --date=short "$@"
+}
+
+# git log
+function glg() {
+  if [[ $# == 0 ]] && git rev-parse @{u} &> /dev/null; then
+    git-log --graph @{u} HEAD
+  else
+    git-log --graph "$@"
+  fi
+}
+
+# git log patch
+function glp()
+{
+  # don't use the pager if in word-diff mode
+  local pager="$(echo "$*" | grep -q -- '--word-diff' && echo --no-pager)"
+
+  # use reverse mode if we have a range
+  local reverse="$(echo "$*" | grep -q '\.\.' && echo --reverse)"
+
+  # if we have no non-option args then default to listing unpushed commits in reverse moode
+  if ! (for ARG in "$@"; do echo "$ARG" | grep -v '^-'; done) | grep -q . && git_current_tracking > /dev/null 2>&1
+    then
+    local default_range="@{upstream}..HEAD"
+    local reverse='--reverse'
+  else
+    local default_range=''
+  fi
+
+  git $pager log --patch -M40 $reverse "$@" $default_range
+}
+
+# git log file
+function glf()
+{
+  git log -M40 --format=%H --follow -- "$@" | xargs --no-run-if-empty git show --stat
+}
+
+# git log search
+function gls()
+{
+  local phrase="$1"
+  shift
+  if [[ $# == 0 ]]
+    then
+    local default_range=HEAD
+  fi
+  glp --pickaxe-all -S"$phrase" "$@" $default_range
+}
+
+# git pull request
+# checkout a GitHub pull request as a local branch
+function gpr()
+{
+  local TEMP_FILE="$(mktemp "${TMPDIR:-/tmp}/gpr.XXXXXX")"
+  echo '+refs/pull/*/head:refs/remotes/origin/pr/*' > "$TEMP_FILE"
+  git config --get-all remote.origin.fetch | grep -v 'refs/remotes/origin/pr/\*$' >> "$TEMP_FILE"
+  git config --unset-all remote.origin.fetch
+  cat "$TEMP_FILE" | while read LINE
+  do
+    git config --add remote.origin.fetch "$LINE"
+  done
+  rm "$TEMP_FILE"
+
+  git fetch
+  if [[ -n "$1" ]]; then
+    git checkout "pr/$1"
+  fi
+}
+
+# git update
+function gup
+{
+  # subshell for `set -e` and `trap`
+  (
+    set -e # fail immediately if there's a problem
+
+    # use `git-up` if installed
+    if type git-up > /dev/null 2>&1
+      then
+      exec git-up
+    fi
+
+    # fetch upstream changes
+    git fetch
+
+    BRANCH=$(git symbolic-ref -q HEAD)
+    BRANCH=${BRANCH##refs/heads/}
+    BRANCH=${BRANCH:-HEAD}
+
+    if [ -z "$(git config branch.$BRANCH.remote)" -o -z "$(git config branch.$BRANCH.merge)" ]
+      then
+      echo "\"$BRANCH\" is not a tracking branch." >&2
+      exit 1
+    fi
+
+    # create a temp file for capturing command output
+    TEMPFILE="`mktemp -t gup.XXXXXX`"
+    trap '{ rm -f "$TEMPFILE"; }' EXIT
+
+    # if we're behind upstream, we need to update
+    if git status | grep "# Your branch" > "$TEMPFILE"
+      then
+
+      # extract tracking branch from message
+      UPSTREAM=$(cat "$TEMPFILE" | cut -d "'" -f 2)
+      if [ -z "$UPSTREAM" ]
+        then
+        echo Could not detect upstream branch >&2
+        exit 1
+      fi
+
+      # can we fast-forward?
+      CAN_FF=1
+      grep -q "can be fast-forwarded" "$TEMPFILE" || CAN_FF=0
+
+      # stash any uncommitted changes
+      git stash | tee "$TEMPFILE"
+      [ "${PIPESTATUS[0]}" -eq 0 ] || exit 1
+
+      # take note if anything was stashed
+      HAVE_STASH=0
+      grep -q "No local changes" "$TEMPFILE" || HAVE_STASH=1
+
+      if [ "$CAN_FF" -ne 0 ]
+        then
+        # if nothing has changed locally, just fast foward.
+        git merge --ff "$UPSTREAM"
+      else
+        # rebase our changes on top of upstream, but keep any merges
+        git rebase -p "$UPSTREAM"
+      fi
+
+      # restore any stashed changes
+      if [ "$HAVE_STASH" -ne 0 ]
+        then
+        git stash pop
+      fi
+
+    fi
+
+    )
+}
+
+# git add untracked
+function gau() {
+  git ls-files --other --exclude-standard -z "$@" | xargs -0 git add -Nv
+}
+
+# git add untracked reset
+function gaur() {
+  git ls-files --exclude-standard --modified -z | xargs -0 git ls-files --stage | while read MODE OBJECT STAGE NAME; do
+    if [[ "$OBJECT" == e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 ]]; then
+      echo "reset '$NAME'"
+      if git rev-parse --quiet --verify HEAD > /dev/null; then
+        git reset -q -- "$NAME" 2>&1
+      else
+        git rm --cached --quiet -- "$NAME"
+      fi
+    fi
+  done
+}
+
+# git commit fixup
+function gcf() {
+  if [[ $# -gt 0 ]]; then
+    git commit --fixup "$@"
+    return
+  fi
+
+  if [[ $(git diff --staged --name-only | wc -l) -lt 1 ]]; then
+    echo Nothing staged to commit. >&2
+    return 1
+  fi
+
+  COMMITS="$(
+    git diff --staged --name-only -z |
+    xargs -0 git log --pretty=format:'%H %s' $(git merge-base origin/HEAD HEAD).. |
+    awk '{ if ($2 != "fixup!") { print $1} }'
+    )"
+
+case $(echo "$COMMITS" | grep . | wc -l | tr -d -c 0-9) in
+  0)
+echo No fixup candidates found. >&2
+return 1
+;;
+1)
+git commit --fixup "$COMMITS"
+;;
+*)
+echo Staged files:
+git diff --staged --name-only | sed 's/^/  /'
+echo
+echo Multiple fixup candidates:
+echo "$COMMITS" | xargs git show -s --oneline | sed 's/^/  /'
+return 1
+;;
+esac
+}
+
+# git rebase tracking
+function grt() {
+  git rebase -i $(git merge-base HEAD $(_git_rebase_target))
+}
+
+# git rebase branch
+function grb() {
+  if _git_assert_origin_head; then
+    git rebase -i $(git merge-base HEAD origin/HEAD)
+  fi
+}
+
+# git cleanup
+function gcu() {
+  git branch --merged origin/develop | grep -v '^\*' | grep feature/ | xargs git branch -d
+  git branch --remotes --merged origin/develop | grep feature/ | sed 's#^ *origin/##'
+}
+
+# git difftool show <ref> [path...]
+function gdts() {
+  REF="${1:-HEAD}"
+  shift
+  git difftool "${REF}^..${REF}" "$@"
+}
+
+
