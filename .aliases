@@ -247,3 +247,4 @@ alias package="cd \"/Users/domiget/Library/Application Support/Sublime Text 3/Pa
 alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
 alias nodepod="/usr/local/lib/node_modules/pod/bin/pod"
 alias npod="/usr/local/lib/node_modules/pod/bin/pod"
+alias stora="ssh root@theraus.ddns.net -p 4253"
